@@ -39,7 +39,6 @@ public class AcmeTpm {
     private Session acmeSession;
     private Account acmeUserAccount;
     private ApacheConfigReader apacheConfig;
-    private ArrayList<DomainTracker> domainTrackers;
     private static String userIdentifier;
 
     private static final Logger logger = LoggerFactory.getLogger(AcmeTpm.class);
@@ -213,10 +212,10 @@ public class AcmeTpm {
             props.setProp("acme.accountURL", userAccount.getLocation().toString());
         } else {
             try {
-                URL accountURL = new URL(accountURLProp);
+                URL accountURL = new URI(accountURLProp).toURL();
                 Login login = acmeSession.login(accountURL, tpmProvider.getUserKeyPair());
                 return login.getAccount();
-            } catch (MalformedURLException e) {
+            } catch (URISyntaxException | MalformedURLException e) {
                 throw new AcmeTpmException("Unable to generate URI from " + accountURLProp);
             }
         }

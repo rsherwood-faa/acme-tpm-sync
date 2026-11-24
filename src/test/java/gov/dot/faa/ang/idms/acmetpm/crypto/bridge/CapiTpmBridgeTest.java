@@ -32,20 +32,14 @@ public class CapiTpmBridgeTest {
 
     @Test
     void shouldGenerateNonExportableTpmKeyAndSignPayload() throws Throwable {
-        try {
-            CapiTpmBridge.generateTpmKey(testAlias, testContainer, testSubjectDN);
-        } catch (IllegalStateException e) {
-            // Gracefully skip on VMs or build agents where TPM 2.0 hardware is disabled or absent
-            // (0x80090030 = NTE_DEVICE_NOT_READY, 0x80090016 = NTE_BAD_KEYSET)
-            if (e.getMessage() != null &&
-                    e.getMessage().contains("0x80090030") || e.getMessage().contains("0x80090016")
-                ) {
-                Assumptions.abort("Skipping test: TPM hardware not available on this machine (" + e.getMessage() + ")");
-            }
-        }
+        // Generate a TPM key using the CapiTpmBridge
+        assertDoesNotThrow(() -> CapiTpmBridge.generateTpmKey(testAlias, testContainer, testSubjectDN), "CapiTpmBridge.generateTpmKey should not throw an exception");
+
+        // Check for errors returned by the native function (if any)
+        
 
         // Verify that the keystore contains the expected entry
-        KeyStore ks = KeyStore.getInstance("Windows=MY", "SunMSCAPI");
+        KeyStore ks = KeyStore.getInstance("Windows-MY", "SunMSCAPI");
         ks.load(null, null);
         assertTrue(ks.containsAlias(testAlias), "Generated key alias should exist in the keystore.");
 
